@@ -15,6 +15,7 @@ namespace MelonECS
         private readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
 
         private readonly List<Query> queries = new List<Query>();
+        private readonly List<System> systems = new List<System>();
         private IMessageQueue[] messageQueues = new IMessageQueue[16];
         private readonly Dictionary<Type, object> resources = new Dictionary<Type, object>();
 
@@ -114,10 +115,20 @@ namespace MelonECS
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllComponents();
         }
         
-        public Span<Entity> GetEntities<T>() where T : struct, IComponent
+        public Span<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
         {
             // RegisterComponentType<T>();
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllEntities();
+        }
+
+        public void NotifyChange<T>(in Entity entity) where T : struct, IComponent
+        {
+            ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).NotifyChange(entity);
+        }
+
+        public Span<Entity> GetChanged<T>() where T : struct, IComponent
+        {
+            return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllChanged();
         }
 
         private void RegisterComponentType<T>() where T : struct, IComponent
@@ -155,23 +166,28 @@ namespace MelonECS
         
         #region Systems
         
-        // public void RegisterSystem<T>() where T : System, new()
-        // {
-        //     var system = new T();
-        //     system.AttachWorld(this);
-        //     systems.Add(system);
-        // }
+        public void RegisterSystem<T>() where T : System, new()
+        {
+            var system = new T();
+            system.AttachWorld(this);
+            systems.Add(system);
+        }
         
         public void Update()
         {
-            // for (int i = 0; i < systems.Count; i++)
-            // {
-            //     systems[i].Run();
-            // }
+            for (int i = 0; i < systems.Count; i++)
+            {
+                systems[i].Run();
+            }
         
             for (int i = 0; i < messageQueues.Length; i++)
             {
                 messageQueues[i]?.Clear();
+            }
+
+            for (int i = 0; i < componentSets.Length; i++)
+            {
+                componentSets[i]?.ClearChanged();
             }
         }
         
@@ -179,7 +195,7 @@ namespace MelonECS
 
         #region Messages
 
-        public void SendMessage<T>(T evt) where T : struct, IMessage 
+        public void PushMessage<T>(T evt) where T : struct, IMessage 
             => ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Push(evt);
 
         public void RegisterMessage<T>() where T : struct, IMessage
@@ -188,7 +204,7 @@ namespace MelonECS
             messageQueues[MessageType<T>.Index] = new MessageQueue<T>();
         }
 
-        public Span<T> GetMessages<T>() where T : struct, IMessage 
+        public Span<T> ReadMessages<T>() where T : struct, IMessage 
             => ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Read();
 
         #endregion

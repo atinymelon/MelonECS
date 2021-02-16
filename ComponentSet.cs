@@ -7,6 +7,7 @@ namespace MelonECS
     {
         void Remove(Entity entity);
         bool TryRemove(Entity entity);
+        void ClearChanged();
     }
     
     internal class ComponentSet<TComponent> : IComponentSet where TComponent : struct, IComponent
@@ -17,6 +18,9 @@ namespace MelonECS
         private Entity[] entities;
         private TComponent[] components;
         private int count;
+        
+        private Entity[] changed;
+        private int changedCount;
 
         public ComponentSet(int entityCapacity, int componentCapacity)
         {
@@ -26,6 +30,7 @@ namespace MelonECS
 
             entities = new Entity[componentCapacity];
             components = new TComponent[componentCapacity];
+            changed = new Entity[componentCapacity];
         }
 
         public void Add(Entity entity, TComponent component)
@@ -80,8 +85,20 @@ namespace MelonECS
             return true;
         }
 
+        public void NotifyChange(Entity entity)
+        {
+            ArrayUtil.EnsureLength(ref changed, changedCount + 1);
+
+            changed[changedCount] = entity;
+            changedCount++;
+        }
+
+        public void ClearChanged() => changedCount = 0;
+
         public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, count);
         public Span<TComponent> AllComponents() => new Span<TComponent>(components, 0, count);
+        
+        public Span<Entity> AllChanged() => new Span<Entity>(changed, 0, changedCount);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(in Entity entity) => indices[entity.Index] != INVALID_INDEX;
