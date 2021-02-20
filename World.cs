@@ -99,25 +99,21 @@ namespace MelonECS
         
         public bool HasComponent<T>(in Entity entity) where T : struct, IComponent
         {
-            // RegisterComponentType<T>();
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).Has(entity);
         }
 
         public ref T GetComponent<T>(in Entity entity) where T : struct, IComponent
         {
-            // RegisterComponentType<T>();
             return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).Get(entity);
         }
         
         public Span<T> GetComponents<T>() where T : struct, IComponent
         {
-            // RegisterComponentType<T>();
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllComponents();
         }
         
         public Span<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
         {
-            // RegisterComponentType<T>();
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllEntities();
         }
 
@@ -146,33 +142,36 @@ namespace MelonECS
 
         #region Resources
 
-        public void AddResource<T>(T resource) where T : class
-        {
-            resources.Add(typeof(T), resource);
-        }
-
+        public void AddResource<T>(T resource) where T : class => resources.Add(typeof(T), resource);
         public T GetResource<T>() where T : class => (T)resources[typeof(T)];
+        public bool TryGetResource(Type type, out object resource) => resources.TryGetValue(type, out resource);
 
         #endregion
         
         #region Queries
         
-        public void RegisterQuery(Query query)
+        public Query CreateQuery(IEnumerable<Type> include, IEnumerable<Type> exclude)
         {
+            var query = new Query(include, exclude);
             queries.Add(query);
+            return query;
         }
 
         #endregion
         
         #region Systems
         
-        public void RegisterSystem<T>() where T : System, new()
+        public void RegisterSystem<T>() where T : System, new() 
+            => systems.Add(new T());
+
+        public void Init()
         {
-            var system = new T();
-            system.AttachWorld(this);
-            systems.Add(system);
+            foreach (System system in systems)
+            {
+                system.Init(this);
+            }
         }
-        
+
         public void Update()
         {
             for (int i = 0; i < systems.Count; i++)

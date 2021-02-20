@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 namespace MelonECS
 {
@@ -7,34 +10,32 @@ namespace MelonECS
         private World world;
         private Query query;
         
-        internal void AttachWorld(World world)
+        public virtual void Init(World world)
         {
             this.world = world;
+
+            var attributes = GetType().GetCustomAttributes(true);
             
-            foreach (object attribute in GetType().GetCustomAttributes(true))
+            var queryInclude = attributes.Where(x => x is QueryWithAttribute)
+                .SelectMany(x => ((QueryWithAttribute) x).types);
+            var queryExclude = attributes.Where(x => x is QueryExcludeAttribute)
+                .SelectMany(x => ((QueryExcludeAttribute) x).types);
+            query = world.CreateQuery(queryInclude, queryExclude);
+            
+            // Setup resources
+            var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            foreach (FieldInfo field in fields)
             {
-                switch (attribute)
+                if (field.IsStatic || !field.IsDefined(typeof(ResourceAttribute)))
+                    continue;
+
+                if (world.TryGetResource(field.FieldType, out object resource))
                 {
-                    case QueryWithAttribute queryWith:
-                    {
-                        query ??= new Query(world);
-                        foreach (Type type in queryWith.types)
-                        {
-                            query.With(type);
-                        }
-
-                        break;
-                    }
-                    case QueryExcludeAttribute queryExclude:
-                    {
-                        query ??= new Query(world);
-                        foreach (Type type in queryExclude.types)
-                        {
-                            query.Exclude(type);
-                        }
-
-                        break;
-                    }
+                    field.SetValue(this, resource);
+                }
+                else
+                {
+                    Debug.LogError($"No resource of type {field.FieldType.FullName} exists");
                 }
             }
         }
@@ -67,7 +68,5 @@ namespace MelonECS
 
         protected void NotifyChange<T>(in Entity entity) where T : struct, IComponent
             => world.NotifyChange<T>(entity);
-
-        protected T Resource<T>() where T : class => world.GetResource<T>();
     }
 }

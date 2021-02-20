@@ -5,19 +5,23 @@ namespace MelonECS
 {
     public class Query
     {
-        private readonly HashSet<int> withSet = new HashSet<int>();
+        private readonly HashSet<int> includeSet = new HashSet<int>();
         private readonly HashSet<int> excludeSet = new HashSet<int>();
 
         private Entity[] entities;
         private readonly HashSet<Entity> entitiesSet = new HashSet<Entity>();
 
-        internal Query(World world)
+        internal Query(IEnumerable<Type> include, IEnumerable<Type> exclude)
         {
-            entities = new Entity[16];
-            world.RegisterQuery(this);
+            entities = new Entity[4];
+
+            foreach (var type in include)
+                includeSet.Add(ComponentType.Index(type));  
+            foreach (var type in exclude)
+                excludeSet.Add(ComponentType.Index(type));
         }
 
-        public void AddEntity(Entity entity)
+        internal void AddEntity(Entity entity)
         {
             if (entitiesSet.Contains(entity))
                 return;
@@ -27,7 +31,7 @@ namespace MelonECS
             entitiesSet.Add(entity);
         }
 
-        public void RemoveEntity(Entity entity)
+        internal void RemoveEntity(Entity entity)
         {
             if (!entitiesSet.Contains(entity))
                 return;
@@ -37,25 +41,14 @@ namespace MelonECS
             entitiesSet.Remove(entity);
         }
 
-        public Query With<T>() where T : struct, IComponent => With(typeof(T));
-        public Query With(Type type)
-        {
-            withSet.Add(ComponentType.Index(type));
-            return this;
-        }
+        internal bool IsMatch(HashSet<int> components) 
+            => includeSet.IsSubsetOf(components) && (excludeSet.Count == 0 || !excludeSet.IsSubsetOf(components));
 
-        public Query Exclude<T>() where T : struct, IComponent => Exclude(typeof(T));
-        public Query Exclude(Type type)
-        {
-            excludeSet.Add(ComponentType.Index(type));
-            return this;
-        }
+        internal bool IsMatch(int component) 
+            => includeSet.Contains(component) && !excludeSet.Contains(component);
 
-        public bool IsMatch(HashSet<int> components) 
-            => withSet.IsSubsetOf(components) && (excludeSet.Count == 0 || !excludeSet.IsSubsetOf(components));
-
-        public bool IsMatch(int component) 
-            => withSet.Contains(component) && !excludeSet.Contains(component);
+        internal bool IsMatch(Query query)
+            => includeSet.SetEquals(query.includeSet) && excludeSet.SetEquals(query.excludeSet);
 
         public Span<Entity> GetEntities() => new Span<Entity>(entities, 0, entitiesSet.Count);
     }

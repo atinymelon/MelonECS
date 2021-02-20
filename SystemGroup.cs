@@ -8,7 +8,7 @@ namespace MelonECS
 		private readonly World world;
 		private readonly List<System> systems = new List<System>();
 		
-		public SystemGroup(World world)
+		internal SystemGroup(World world)
 		{
 			this.world = world;
 		}
@@ -24,7 +24,6 @@ namespace MelonECS
 		public void RegisterSystem<T>() where T : System, new()
 		{
 			var system = new T();
-			system.AttachWorld(world);
 			systems.Add(system);
 		}
 	}
