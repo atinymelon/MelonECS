@@ -8,15 +8,15 @@ namespace MelonECS
         // To prevent entity ids from being reused too often, we prevent reuse until this many entities have been destroyed
         private const int MINIMUM_ENTITY_FREE_INDICES = 1024;
 
-        private readonly List<int> entityGenerations = new List<int>();
-        private readonly Queue<int> entityFreeIndices = new Queue<int>();
+        internal readonly List<int> entityGenerations = new List<int>();
+        internal readonly Queue<int> entityFreeIndices = new Queue<int>();
 
-        private IComponentSet[] componentSets = new IComponentSet[16];
-        private readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
+        internal IComponentSet[] componentSets = new IComponentSet[16];
+        internal readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
 
-        private readonly List<Query> queries = new List<Query>();
-        private readonly List<System> systems = new List<System>();
-        private IMessageQueue[] messageQueues = new IMessageQueue[16];
+        internal readonly List<Query> queries = new List<Query>();
+        internal readonly List<System> systems = new List<System>();
+        internal IMessageQueue[] messageQueues = new IMessageQueue[16];
         private readonly Dictionary<Type, object> resources = new Dictionary<Type, object>();
 
         #region Entities
@@ -106,7 +106,7 @@ namespace MelonECS
         {
             return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).Get(entity);
         }
-        
+
         public Span<T> GetComponents<T>() where T : struct, IComponent
         {
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllComponents();

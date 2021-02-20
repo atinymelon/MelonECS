@@ -16,8 +16,8 @@ namespace MelonECS
 
             var attributes = GetType().GetCustomAttributes(true);
             
-            var queryInclude = attributes.Where(x => x is QueryWithAttribute)
-                .SelectMany(x => ((QueryWithAttribute) x).types);
+            var queryInclude = attributes.Where(x => x is QueryIncludeAttribute)
+                .SelectMany(x => ((QueryIncludeAttribute) x).types);
             var queryExclude = attributes.Where(x => x is QueryExcludeAttribute)
                 .SelectMany(x => ((QueryExcludeAttribute) x).types);
             query = world.CreateQuery(queryInclude, queryExclude);

@@ -2,11 +2,11 @@
 
 namespace MelonECS
 {
-    public class QueryWithAttribute : Attribute
+    public class QueryIncludeAttribute : Attribute
     {
         public Type[] types;
 
-        public QueryWithAttribute(params Type[] types)
+        public QueryIncludeAttribute(params Type[] types)
             => this.types = types;
     }
 

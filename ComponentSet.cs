@@ -8,17 +8,21 @@ namespace MelonECS
         void Remove(Entity entity);
         bool TryRemove(Entity entity);
         void ClearChanged();
+        IComponent GetGeneric(in Entity entity);
+        
+        int Count { get; }
     }
     
     internal class ComponentSet<TComponent> : IComponentSet where TComponent : struct, IComponent
     {
         private const int INVALID_INDEX = -1;
+
+        public int Count { get; private set; }
         
         private int[] indices;
         private Entity[] entities;
         private TComponent[] components;
-        private int count;
-        
+
         private Entity[] changed;
         private int changedCount;
 
@@ -40,7 +44,7 @@ namespace MelonECS
                 // If somehow an Entity's index is extremely large allocate just enough space, otherwise double what we have
                 var temp = new int[Math.Max(entity.Index + 1, indices.Length * 2)];
                 Array.Copy(indices, temp, indices.Length);
-                for (int i = count; i < temp.Length; i++)
+                for (int i = Count; i < temp.Length; i++)
                     temp[i] = INVALID_INDEX;
                 indices = temp;
             }
@@ -50,14 +54,14 @@ namespace MelonECS
                 throw new Exception($"Failed to add component. {entity} already has component {typeof(TComponent).Name}");
             }
 
-            indices[entity.Index] = count;
+            indices[entity.Index] = Count;
             
-            ArrayUtil.EnsureLength(ref entities, count + 1);
-            ArrayUtil.EnsureLength(ref components, count + 1);
+            ArrayUtil.EnsureLength(ref entities, Count + 1);
+            ArrayUtil.EnsureLength(ref components, Count + 1);
 
-            entities[count] = entity;
-            components[count] = component;
-            count++;
+            entities[Count] = entity;
+            components[Count] = component;
+            Count++;
         }
 
         public void Remove(Entity entity)
@@ -69,12 +73,12 @@ namespace MelonECS
 
             // Swap with end of list rather than shifting everything
             int newIndex = indices[entity.Index];
-            indices[entities[count - 1].Index] = newIndex;
-            entities[newIndex] = entities[count - 1];
-            components[newIndex] = components[count - 1];
+            indices[entities[Count - 1].Index] = newIndex;
+            entities[newIndex] = entities[Count - 1];
+            components[newIndex] = components[Count - 1];
             indices[entity.Index] = INVALID_INDEX;
             
-            count--;
+            Count--;
         }
 
         public bool TryRemove(Entity entity)
@@ -95,9 +99,9 @@ namespace MelonECS
 
         public void ClearChanged() => changedCount = 0;
 
-        public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, count);
-        public Span<TComponent> AllComponents() => new Span<TComponent>(components, 0, count);
-        
+        public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, Count);
+        public Span<TComponent> AllComponents() => new Span<TComponent>(components, 0, Count);
+
         public Span<Entity> AllChanged() => new Span<Entity>(changed, 0, changedCount);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -105,5 +109,7 @@ namespace MelonECS
         
         // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TComponent Get(in Entity entity) => ref components[indices[entity.Index]];
+
+        public IComponent GetGeneric(in Entity entity) => (IComponent)components[indices[entity.Index]];
     }
 }

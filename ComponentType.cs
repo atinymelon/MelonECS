@@ -33,5 +33,15 @@ using System.Collections.Generic;
             ComponentIndex.typeIndex.Add(type, index);
             return index;
         }
+
+        public static Type Type(int index)
+        {
+            foreach (var data in ComponentIndex.typeIndex)
+            {
+                if (data.Value == index)
+                    return data.Key;
+            }
+            return null;
+        }
     }
 }
