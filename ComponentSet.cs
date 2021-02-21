@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace MelonECS
@@ -7,7 +8,7 @@ namespace MelonECS
     {
         void Remove(Entity entity);
         bool TryRemove(Entity entity);
-        void ClearChanged();
+        void Update();
         IComponent GetGeneric(in Entity entity);
         
         int Count { get; }
@@ -25,6 +26,9 @@ namespace MelonECS
 
         private Entity[] changed;
         private int changedCount;
+
+        private readonly List<(Entity, TComponent)> addedComponents = new List<(Entity, TComponent)>();
+        private readonly List<Entity> removedComponents = new List<Entity>();
 
         public ComponentSet(int entityCapacity, int componentCapacity)
         {
@@ -54,14 +58,7 @@ namespace MelonECS
                 throw new Exception($"Failed to add component. {entity} already has component {typeof(TComponent).Name}");
             }
 
-            indices[entity.Index] = Count;
-            
-            ArrayUtil.EnsureLength(ref entities, Count + 1);
-            ArrayUtil.EnsureLength(ref components, Count + 1);
-
-            entities[Count] = entity;
-            components[Count] = component;
-            Count++;
+            addedComponents.Add((entity, component));
         }
 
         public void Remove(Entity entity)
@@ -70,15 +67,8 @@ namespace MelonECS
             {
                 throw new Exception($"Failed to remove component. {entity} does not have component {typeof(TComponent).Name}");
             }
-
-            // Swap with end of list rather than shifting everything
-            int newIndex = indices[entity.Index];
-            indices[entities[Count - 1].Index] = newIndex;
-            entities[newIndex] = entities[Count - 1];
-            components[newIndex] = components[Count - 1];
-            indices[entity.Index] = INVALID_INDEX;
             
-            Count--;
+            removedComponents.Add(entity);
         }
 
         public bool TryRemove(Entity entity)
@@ -97,11 +87,44 @@ namespace MelonECS
             changedCount++;
         }
 
-        public void ClearChanged() => changedCount = 0;
+        public void Update()
+        {
+            changedCount = 0;
+
+            if (addedComponents.Count == 0 && removedComponents.Count == 0)
+                return;
+            
+            // Process adds and removes
+            for (int i = 0; i < removedComponents.Count; i++)
+            {
+                // Swap with end of list rather than shifting everything
+                int newIndex = indices[removedComponents[i].Index];
+                indices[entities[Count - 1].Index] = newIndex;
+                entities[newIndex] = entities[Count - 1];
+                components[newIndex] = components[Count - 1];
+                indices[removedComponents[i].Index] = INVALID_INDEX;
+            
+                Count--;
+            }
+            
+            ArrayUtil.EnsureLength(ref entities, Count + addedComponents.Count);
+            ArrayUtil.EnsureLength(ref components, Count + addedComponents.Count);
+            for (int i = 0; i < addedComponents.Count; i++)
+            {
+                (Entity entity, TComponent component) = addedComponents[i];
+                
+                indices[entity.Index] = Count;
+                entities[Count] = entity;
+                components[Count] = component;
+                Count++;
+            }
+            
+            addedComponents.Clear();
+            removedComponents.Clear();
+        }
 
         public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, Count);
         public Span<TComponent> AllComponents() => new Span<TComponent>(components, 0, Count);
-
         public Span<Entity> AllChanged() => new Span<Entity>(changed, 0, changedCount);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

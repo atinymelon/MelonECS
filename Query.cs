@@ -11,6 +11,9 @@ namespace MelonECS
         private Entity[] entities;
         private readonly HashSet<Entity> entitiesSet = new HashSet<Entity>();
 
+        private readonly List<Entity> addedEntities = new List<Entity>();
+        private readonly List<Entity> removedEntities = new List<Entity>();
+
         internal Query(IEnumerable<Type> include, IEnumerable<Type> exclude)
         {
             entities = new Entity[4];
@@ -23,22 +26,40 @@ namespace MelonECS
 
         internal void AddEntity(Entity entity)
         {
-            if (entitiesSet.Contains(entity))
+            if (entitiesSet.Contains(entity) || addedEntities.Contains(entity))
                 return;
-            
-            ArrayUtil.EnsureLength(ref entities, entitiesSet.Count + 1);
-            entities[entitiesSet.Count] = entity;
-            entitiesSet.Add(entity);
+
+            addedEntities.Add(entity);
         }
 
         internal void RemoveEntity(Entity entity)
         {
-            if (!entitiesSet.Contains(entity))
+            if (!entitiesSet.Contains(entity) || removedEntities.Contains(entity))
+                return;
+            removedEntities.Add(entity);
+        }
+
+        internal void Update()
+        {
+            if ( addedEntities.Count == 0 && removedEntities.Count == 0 )
                 return;
             
-            int index = Array.IndexOf(entities, entity);
-            entities[index] = entities[entitiesSet.Count - 1];
-            entitiesSet.Remove(entity);
+            for (int i = 0; i < removedEntities.Count; i++)
+            {
+                int index = Array.IndexOf(entities, removedEntities[i]);
+                entities[index] = entities[entitiesSet.Count - 1];
+                entitiesSet.Remove(removedEntities[i]);
+            }
+            
+            ArrayUtil.EnsureLength(ref entities, entitiesSet.Count + addedEntities.Count);
+            for (int i = 0; i < addedEntities.Count; i++)
+            {
+                entities[entitiesSet.Count] = addedEntities[i];
+                entitiesSet.Add(addedEntities[i]);
+            }
+            
+            addedEntities.Clear();
+            removedEntities.Clear();
         }
 
         internal bool IsMatch(HashSet<int> components) 

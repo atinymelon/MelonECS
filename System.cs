@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -15,12 +16,24 @@ namespace MelonECS
             this.world = world;
 
             var attributes = GetType().GetCustomAttributes(true);
-            
-            var queryInclude = attributes.Where(x => x is QueryIncludeAttribute)
-                .SelectMany(x => ((QueryIncludeAttribute) x).types);
-            var queryExclude = attributes.Where(x => x is QueryExcludeAttribute)
-                .SelectMany(x => ((QueryExcludeAttribute) x).types);
-            query = world.CreateQuery(queryInclude, queryExclude);
+
+            IEnumerable<Type> queryIncludeTypes = null;
+            IEnumerable<Type> queryExcludeTypes = null;
+            foreach (var attribute in attributes)
+            {
+                switch (attribute)
+                {
+                    case QueryIncludeAttribute includeAttribute:
+                        queryIncludeTypes = includeAttribute.types;
+                        break;
+                    case QueryExcludeAttribute excludeAttribute:
+                        queryExcludeTypes = excludeAttribute.types;
+                        break;
+                }
+            }
+  
+            if ( queryIncludeTypes != null || queryExcludeTypes != null )
+                query = world.CreateQuery(queryIncludeTypes, queryExcludeTypes);
             
             // Setup resources
             var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

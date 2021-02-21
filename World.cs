@@ -186,7 +186,12 @@ namespace MelonECS
 
             for (int i = 0; i < componentSets.Length; i++)
             {
-                componentSets[i]?.ClearChanged();
+                componentSets[i]?.Update();
+            }
+            
+            for (int i = 0; i < queries.Count; i++)
+            {
+                queries[i]?.Update();
             }
         }
         
