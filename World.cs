@@ -199,13 +199,14 @@ namespace MelonECS
 
         #region Messages
 
-        public void PushMessage<T>(T evt) where T : struct, IMessage 
-            => ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Push(evt);
-
-        public void RegisterMessage<T>() where T : struct, IMessage
+        public void PushMessage<T>(T evt) where T : struct, IMessage
         {
-            ArrayUtil.EnsureLength(ref messageQueues, MessageType<T>.Index + 1);
-            messageQueues[MessageType<T>.Index] = new MessageQueue<T>();
+            if (messageQueues[MessageType<T>.Index] == null)
+            {
+                ArrayUtil.EnsureLength(ref messageQueues, MessageType<T>.Index + 1);
+                messageQueues[MessageType<T>.Index] = new MessageQueue<T>();
+            }
+            ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Push(evt);
         }
 
         public Span<T> ReadMessages<T>() where T : struct, IMessage 
