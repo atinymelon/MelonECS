@@ -127,6 +127,26 @@ namespace MelonECS
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllChanged();
         }
 
+        public Span<Entity> GetAddedEntities<T>() where T : struct, IComponent
+        {
+            return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllAddedEntities();
+        }
+
+        public ref T GetAddedComponent<T>(in Entity entity) where T : struct, IComponent
+        {
+            return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).GetAddedComponent(entity);
+        }
+
+        public Span<Entity> GetRemovedEntities<T>() where T : struct, IComponent
+        {
+            return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllRemovedEntities();
+        }
+
+        public ref T GetRemovedComponent<T>(in Entity entity) where T : struct, IComponent
+        {
+            return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).GetRemovedComponent(entity);
+        }
+
         private void RegisterComponentType<T>() where T : struct, IComponent
         {
             ArrayUtil.EnsureLength(ref componentSets, ComponentType<T>.Index + 1);
@@ -209,8 +229,15 @@ namespace MelonECS
             ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Push(evt);
         }
 
-        public Span<T> ReadMessages<T>() where T : struct, IMessage 
-            => ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Read();
+        public Span<T> ReadMessages<T>() where T : struct, IMessage
+        {
+            if (messageQueues[MessageType<T>.Index] == null)
+            {
+                ArrayUtil.EnsureLength(ref messageQueues, MessageType<T>.Index + 1);
+                messageQueues[MessageType<T>.Index] = new MessageQueue<T>();
+            }
+            return ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Read();
+        }
 
         #endregion
     }

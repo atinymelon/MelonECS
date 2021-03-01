@@ -27,8 +27,12 @@ namespace MelonECS
         private Entity[] changed;
         private int changedCount;
 
-        private readonly List<(Entity, TComponent)> addedComponents = new List<(Entity, TComponent)>();
-        private readonly List<Entity> removedComponents = new List<Entity>();
+        // private readonly List<(Entity, TComponent)> addedComponents = new List<(Entity, TComponent)>();
+        // private readonly List<Entity> removedComponents = new List<Entity>();
+
+        private readonly ResizableArray<Entity> addedEntities = new ResizableArray<Entity>(4);
+        private readonly ResizableArray<TComponent> addedComponents = new ResizableArray<TComponent>(4);
+        private readonly ResizableArray<Entity> removedEntities = new ResizableArray<Entity>(4);
 
         public ComponentSet(int entityCapacity, int componentCapacity)
         {
@@ -58,7 +62,8 @@ namespace MelonECS
                 throw new Exception($"Failed to add component. {entity} already has component {typeof(TComponent).Name}");
             }
 
-            addedComponents.Add((entity, component));
+            addedEntities.Add(entity);
+            addedComponents.Add(component);
         }
 
         public void Remove(Entity entity)
@@ -67,8 +72,8 @@ namespace MelonECS
             {
                 throw new Exception($"Failed to remove component. {entity} does not have component {typeof(TComponent).Name}");
             }
-            
-            removedComponents.Add(entity);
+
+            removedEntities.Add(entity);
         }
 
         public bool TryRemove(Entity entity)
@@ -91,41 +96,46 @@ namespace MelonECS
         {
             changedCount = 0;
 
-            if (addedComponents.Count == 0 && removedComponents.Count == 0)
+            if (addedComponents.Count == 0 && addedEntities.Count == 0 && removedEntities.Count == 0)
                 return;
             
             // Process adds and removes
-            for (int i = 0; i < removedComponents.Count; i++)
+            foreach (ref Entity entity in removedEntities.Span)
             {
                 // Swap with end of list rather than shifting everything
-                int newIndex = indices[removedComponents[i].Index];
+                int newIndex = indices[entity.Index];
                 indices[entities[Count - 1].Index] = newIndex;
                 entities[newIndex] = entities[Count - 1];
                 components[newIndex] = components[Count - 1];
-                indices[removedComponents[i].Index] = INVALID_INDEX;
-            
+                indices[entity.Index] = INVALID_INDEX;
                 Count--;
             }
             
-            ArrayUtil.EnsureLength(ref entities, Count + addedComponents.Count);
+            ArrayUtil.EnsureLength(ref entities, Count + addedEntities.Count);
             ArrayUtil.EnsureLength(ref components, Count + addedComponents.Count);
-            for (int i = 0; i < addedComponents.Count; i++)
+            for (int i = 0; i < addedEntities.Span.Length; i++)
             {
-                (Entity entity, TComponent component) = addedComponents[i];
-                
+                Entity entity = addedEntities.Span[i];
                 indices[entity.Index] = Count;
                 entities[Count] = entity;
-                components[Count] = component;
+                components[Count] = addedComponents.Span[i];
                 Count++;
             }
-            
+
+            addedEntities.Clear();
             addedComponents.Clear();
-            removedComponents.Clear();
+            removedEntities.Clear();
         }
 
         public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, Count);
         public Span<TComponent> AllComponents() => new Span<TComponent>(components, 0, Count);
         public Span<Entity> AllChanged() => new Span<Entity>(changed, 0, changedCount);
+        
+        public Span<Entity> AllAddedEntities() => addedEntities.Span;
+        public ref TComponent GetAddedComponent(in Entity entity) => ref addedComponents.Span[addedEntities.IndexOf(entity)];
+
+        public Span<Entity> AllRemovedEntities() => removedEntities.Span;
+        public ref TComponent GetRemovedComponent(in Entity entity) => ref Get(entity);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(in Entity entity) => indices[entity.Index] != INVALID_INDEX;
