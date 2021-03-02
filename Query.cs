@@ -18,10 +18,17 @@ namespace MelonECS
         {
             entities = new Entity[4];
 
-            foreach (var type in include)
-                includeSet.Add(ComponentType.Index(type));  
-            foreach (var type in exclude)
-                excludeSet.Add(ComponentType.Index(type));
+            if (include != null)
+            {
+                foreach (var type in include)
+                    includeSet.Add(ComponentType.Index(type));
+            }
+
+            if (exclude != null)
+            {
+                foreach (var type in exclude)
+                    excludeSet.Add(ComponentType.Index(type));
+            }
         }
 
         internal void AddEntity(Entity entity)

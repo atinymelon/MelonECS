@@ -2,9 +2,9 @@
 
 namespace MelonECS
 {
-    internal static class ArrayUtil
+    public static class ArrayUtil
     {
-        internal static void EnsureLength<T>(ref T[] array, int length)
+        public static void EnsureLength<T>(ref T[] array, int length)
         {
             if (length <= array.Length) 
                 return;
