@@ -81,5 +81,44 @@ namespace MelonECS
 
         protected void NotifyChange<T>(in Entity entity) where T : struct, IComponent
             => world.NotifyChange<T>(entity);
+
+        protected delegate void ForEachDelegate<T>(in Entity entity, ref T comp) 
+            where T : struct, IComponent;
+        protected delegate void ForEachDelegate<T1, T2>(in Entity entity, ref T1 comp1, ref T2 comp2)
+            where T1 : struct, IComponent
+            where T2 : struct, IComponent;
+        protected delegate void ForEachDelegate<T1, T2, T3>(in Entity entity, ref T1 comp1, ref T2 comp2, ref T3 comp3) 
+            where T1 : struct, IComponent
+            where T2 : struct, IComponent
+            where T3 : struct, IComponent;
+
+        protected void ForEach<T>(Span<Entity> entities, ForEachDelegate<T> func) where T : struct, IComponent
+        {
+            foreach (ref Entity entity in entities)
+            {
+                func(entity, ref GetComponent<T>(entity));
+            }
+        }
+
+        protected void ForEach<T1, T2>(Span<Entity> entities, ForEachDelegate<T1, T2> func)
+            where T1 : struct, IComponent
+            where T2 : struct, IComponent
+        {
+            foreach (ref Entity entity in entities)
+            {
+                func(entity, ref GetComponent<T1>(entity), ref GetComponent<T2>(entity));
+            }
+        }
+        
+        protected void ForEach<T1, T2, T3>(Span<Entity> entities, ForEachDelegate<T1, T2, T3> func) 
+            where T1 : struct, IComponent
+            where T2 : struct, IComponent
+            where T3 : struct, IComponent
+        {
+            foreach (ref Entity entity in entities)
+            {
+                func(entity, ref GetComponent<T1>(entity), ref GetComponent<T2>(entity), ref GetComponent<T3>(entity));
+            }
+        }
     }
 }
