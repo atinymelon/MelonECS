@@ -55,6 +55,8 @@ namespace MelonECS
         
         public abstract void Run();
 
+        protected bool IsEntityAlive(in Entity entity) => world.IsEntityAlive(entity);
+
         protected Span<T> GetComponents<T>() where T : struct, IComponent
             => world.GetComponents<T>();
 

@@ -22,5 +22,7 @@ namespace MelonECS
         public static bool operator !=(Entity a, Entity b) => a.Index != b.Index || a.Generation != b.Generation;
 
         public override string ToString() => $"Entity[{Index}|{Generation}]";
+
+        public static Entity Invalid => default;
     }
 }

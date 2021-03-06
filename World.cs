@@ -41,7 +41,7 @@ namespace MelonECS
         public static Entity MakeEntity(World world, int index, int generation) 
             => new Entity(world, index, generation);
 
-        public bool IsEntityAlive(Entity entity) => entityGenerations[entity.Index] == entity.Generation;
+        public bool IsEntityAlive(in Entity entity) => entity.Index != -1 && entityGenerations[entity.Index] == entity.Generation;
 
         public void DestroyEntity(Entity entity)
         {
