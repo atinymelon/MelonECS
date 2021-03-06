@@ -10,7 +10,7 @@ namespace MelonECS.UnityObjectView
         [SerializeField] private bool isScenePrefab;
 
         private readonly Queue<ObjectView> freeViews = new Queue<ObjectView>();
-        private readonly HashSet<ObjectView> allViews = new HashSet<ObjectView>();
+        private readonly List<ObjectView> allViews = new List<ObjectView>();
 
         private void Awake()
         {
@@ -23,6 +23,13 @@ namespace MelonECS.UnityObjectView
             T view = freeViews.Count == 0 ? CreateInstance<T>() : freeViews.Dequeue().As<T>();
             view.Show();
             return view;
+        }
+
+        public T Instantiate<T>(Vector3 worldPosition) where T : ObjectView
+        {
+            var instance = Instantiate<T>();
+            instance.transform.position = worldPosition;
+            return instance;
         }
 
         public void Recycle(ObjectView view)
@@ -52,7 +59,6 @@ namespace MelonECS.UnityObjectView
             instance.Pool = this;
             
             allViews.Add(instance);
-            freeViews.Enqueue(instance);
             
             return instance;
         }

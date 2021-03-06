@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace MelonECS
 {
@@ -9,7 +10,7 @@ namespace MelonECS
             if (length <= array.Length) 
                 return;
             
-            var temp = new T[array.Length * 2];
+            var temp = new T[Mathf.Max(array.Length * 2, length)];
             Array.Copy(array, temp, array.Length);
             array = temp;
         }

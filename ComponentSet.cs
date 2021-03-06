@@ -111,8 +111,8 @@ namespace MelonECS
                 Count--;
             }
             
-            ArrayUtil.EnsureLength(ref entities, Count + addedEntities.Count);
-            ArrayUtil.EnsureLength(ref components, Count + addedComponents.Count);
+            ArrayUtil.EnsureLength(ref entities, Count + addedEntities.Count + 1);
+            ArrayUtil.EnsureLength(ref components, Count + addedComponents.Count + 1);
             for (int i = 0; i < addedEntities.Span.Length; i++)
             {
                 Entity entity = addedEntities.Span[i];
