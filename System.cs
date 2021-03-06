@@ -72,6 +72,9 @@ namespace MelonECS
         protected Span<T> ReadMessages<T>() where T : struct, IMessage
             => world.ReadMessages<T>();
 
+        protected bool AnyMessages<T>() where T : struct, IMessage
+            => world.ReadMessages<T>().Length > 0;
+
         protected Span<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
             => world.GetEntitiesWithComponent<T>();
 
