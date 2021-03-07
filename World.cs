@@ -108,7 +108,7 @@ namespace MelonECS
         
         public bool HasComponent<T>(in Entity entity) where T : struct, IComponent
         {
-            return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).Has(entity);
+            return ((ComponentSet<T>) componentSets[ComponentType<T>.Index])?.Has(entity) ?? false;
         }
 
         public ref T GetComponent<T>(in Entity entity) where T : struct, IComponent
