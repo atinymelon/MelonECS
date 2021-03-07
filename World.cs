@@ -18,6 +18,7 @@ namespace MelonECS
         internal readonly List<System> systems = new List<System>();
         internal IMessageQueue[] messageQueues = new IMessageQueue[16];
         private readonly Dictionary<Type, object> resources = new Dictionary<Type, object>();
+        private bool areEntityComponentChanges = false;
 
         #region Entities
 
@@ -34,6 +35,8 @@ namespace MelonECS
                 index = entityGenerations.Count - 1;
             }
 
+            areEntityComponentChanges = true;
+            
             Entity entity = MakeEntity(this, index, entityGenerations[index]);
             return entity;
         }
@@ -61,6 +64,8 @@ namespace MelonECS
             }
             
             entityComponentMap.RemoveAll(entity);
+            
+            areEntityComponentChanges = true;
         }
 
         #endregion
@@ -80,6 +85,8 @@ namespace MelonECS
                 else
                     query.RemoveEntity(entity);
             }
+            
+            areEntityComponentChanges = true;
         }
         
         public void RemoveComponent<T>(Entity entity) where T : struct, IComponent
@@ -95,6 +102,8 @@ namespace MelonECS
                 else
                     query.RemoveEntity(entity);
             }
+            
+            areEntityComponentChanges = true;
         }
         
         public bool HasComponent<T>(in Entity entity) where T : struct, IComponent
@@ -197,6 +206,7 @@ namespace MelonECS
             for (int i = 0; i < systems.Count; i++)
             {
                 systems[i].Run();
+                Flush();
             }
         
             for (int i = 0; i < messageQueues.Length; i++)
@@ -206,12 +216,25 @@ namespace MelonECS
 
             for (int i = 0; i < componentSets.Length; i++)
             {
-                componentSets[i]?.Update();
+                componentSets[i]?.ClearChangedEntities();
+            }
+        }
+
+        private void Flush()
+        {
+            if (!areEntityComponentChanges)
+                return;
+
+            areEntityComponentChanges = false;
+            
+            for (int i = 0; i < componentSets.Length; i++)
+            {
+                componentSets[i]?.FlushAddsAndRemoves();
             }
             
             for (int i = 0; i < queries.Count; i++)
             {
-                queries[i]?.Update();
+                queries[i]?.FlushAddsAndRemoves();
             }
         }
         

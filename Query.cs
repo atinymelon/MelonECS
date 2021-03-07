@@ -46,7 +46,7 @@ namespace MelonECS
             removedEntities.Add(entity);
         }
 
-        internal void Update()
+        internal void FlushAddsAndRemoves()
         {
             if ( addedEntities.Count == 0 && removedEntities.Count == 0 )
                 return;

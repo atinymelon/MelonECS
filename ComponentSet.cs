@@ -8,7 +8,8 @@ namespace MelonECS
     {
         void Remove(Entity entity);
         bool TryRemove(Entity entity);
-        void Update();
+        void ClearChangedEntities();
+        void FlushAddsAndRemoves();
         IComponent GetGeneric(in Entity entity);
         
         int Count { get; }
@@ -92,10 +93,13 @@ namespace MelonECS
             changedCount++;
         }
 
-        public void Update()
+        public void ClearChangedEntities()
         {
             changedCount = 0;
+        }
 
+        public void FlushAddsAndRemoves()
+        {
             if (addedComponents.Count == 0 && addedEntities.Count == 0 && removedEntities.Count == 0)
                 return;
             

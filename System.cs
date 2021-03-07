@@ -8,7 +8,7 @@ namespace MelonECS
 {
     public abstract class System
     {
-        private World world;
+        protected World world;
         private Query query;
         
         public virtual void Init(World world)
