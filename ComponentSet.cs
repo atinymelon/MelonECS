@@ -8,7 +8,7 @@ namespace MelonECS
     {
         void Remove(Entity entity);
         bool TryRemove(Entity entity);
-        void ClearChangedEntities();
+        void EndOfFrameCleanup();
         void FlushAddsAndRemoves();
         IComponent GetGeneric(in Entity entity);
         
@@ -34,6 +34,9 @@ namespace MelonECS
         private readonly ResizableArray<Entity> addedEntities = new ResizableArray<Entity>(4);
         private readonly ResizableArray<TComponent> addedComponents = new ResizableArray<TComponent>(4);
         private readonly ResizableArray<Entity> removedEntities = new ResizableArray<Entity>(4);
+        private readonly ResizableArray<TComponent> removedComponents = new ResizableArray<TComponent>(4);
+
+        private bool isDirty = false;
 
         public ComponentSet(int entityCapacity, int componentCapacity)
         {
@@ -65,6 +68,7 @@ namespace MelonECS
 
             addedEntities.Add(entity);
             addedComponents.Add(component);
+            isDirty = true;
         }
 
         public void Remove(Entity entity)
@@ -75,6 +79,8 @@ namespace MelonECS
             }
 
             removedEntities.Add(entity);
+            removedComponents.Add(Get(entity));
+            isDirty = true;
         }
 
         public bool TryRemove(Entity entity)
@@ -93,19 +99,27 @@ namespace MelonECS
             changedCount++;
         }
 
-        public void ClearChangedEntities()
+        public void EndOfFrameCleanup()
         {
             changedCount = 0;
+            
+            addedEntities.Clear();
+            addedComponents.Clear();
+            removedEntities.Clear();
+            removedComponents.Clear();
         }
 
         public void FlushAddsAndRemoves()
         {
-            if (addedComponents.Count == 0 && addedEntities.Count == 0 && removedEntities.Count == 0)
+            if (!isDirty)
                 return;
             
             // Process adds and removes
             foreach (ref Entity entity in removedEntities.Span)
             {
+                if (indices[entity.Index] == INVALID_INDEX)
+                    continue;
+
                 // Swap with end of list rather than shifting everything
                 int newIndex = indices[entity.Index];
                 indices[entities[Count - 1].Index] = newIndex;
@@ -120,15 +134,15 @@ namespace MelonECS
             for (int i = 0; i < addedEntities.Span.Length; i++)
             {
                 Entity entity = addedEntities.Span[i];
+
+                if (indices[entity.Index] != INVALID_INDEX)
+                    continue;
+                
                 indices[entity.Index] = Count;
                 entities[Count] = entity;
                 components[Count] = addedComponents.Span[i];
                 Count++;
             }
-
-            addedEntities.Clear();
-            addedComponents.Clear();
-            removedEntities.Clear();
         }
 
         public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, Count);
@@ -139,7 +153,7 @@ namespace MelonECS
         public ref TComponent GetAddedComponent(in Entity entity) => ref addedComponents.Span[addedEntities.IndexOf(entity)];
 
         public Span<Entity> AllRemovedEntities() => removedEntities.Span;
-        public ref TComponent GetRemovedComponent(in Entity entity) => ref Get(entity);
+        public ref TComponent GetRemovedComponent(in Entity entity) => ref removedComponents.Span[removedEntities.IndexOf(entity)];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(in Entity entity) => indices[entity.Index] != INVALID_INDEX;

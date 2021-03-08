@@ -46,7 +46,7 @@ namespace MelonECS
 
         public bool IsEntityAlive(in Entity entity) => entity.Index != -1 && entityGenerations[entity.Index] == entity.Generation;
 
-        public void DestroyEntity(Entity entity)
+        public void DestroyEntity(in Entity entity)
         {
             int index = entity.Index;
             ++entityGenerations[index];
@@ -108,7 +108,7 @@ namespace MelonECS
         
         public bool HasComponent<T>(in Entity entity) where T : struct, IComponent
         {
-            return ((ComponentSet<T>) componentSets[ComponentType<T>.Index])?.Has(entity) ?? false;
+            return ComponentType<T>.Index < componentSets.Length && (((ComponentSet<T>) componentSets[ComponentType<T>.Index])?.Has(entity) ?? false);
         }
 
         public ref T GetComponent<T>(in Entity entity) where T : struct, IComponent
@@ -216,11 +216,11 @@ namespace MelonECS
 
             for (int i = 0; i < componentSets.Length; i++)
             {
-                componentSets[i]?.ClearChangedEntities();
+                componentSets[i]?.EndOfFrameCleanup();
             }
         }
 
-        private void Flush()
+        public void Flush()
         {
             if (!areEntityComponentChanges)
                 return;

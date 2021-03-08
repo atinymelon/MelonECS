@@ -11,9 +11,9 @@ using System.Collections.Generic;
         static ComponentIndex() => typeIndex = new Dictionary<Type, int>();
     }
     
-    internal static class ComponentType<T> where T : struct, IComponent
+    public static class ComponentType<T> where T : struct, IComponent
     {
-        internal static readonly int Index;
+        public static readonly int Index;
 
         static ComponentType()
         {
@@ -22,7 +22,7 @@ using System.Collections.Generic;
         }
     }
 
-    internal static class ComponentType
+    public static class ComponentType
     {
         public static int Index(Type type)
         {

@@ -2,9 +2,9 @@
 {
     public struct ObjectViewRef : IComponent
     {
-        public ObjectView view;
+        public int id;
 
-        public ObjectViewRef(ObjectView view)
-            => this.view = view;
+        public ObjectViewRef(int id)
+            => this.id = id;
     }
 }
