@@ -3,19 +3,19 @@ using UnityEditor.Experimental.GraphView;
 
 namespace MelonECS
 {
-    public class ResizableArray< T >
+    public class StructList< T > where T : struct
     {
         public int Count { get; private set; }
         public Span<T> Span => new Span<T>(array, 0, Count);
         
         private T[] array;
 
-        public ResizableArray(int capacity)
+        public StructList(int capacity)
         {
             array = new T[capacity];
         }
         
-        public void Add(T item)
+        public void Add(in T item)
         {
             if (Count >= array.Length)
             {
@@ -26,7 +26,7 @@ namespace MelonECS
             Count++;
         }
 
-        public void Remove(T item)
+        public void Remove(in T item)
         {
             for (int i = 0; i < Count; i++)
             {
@@ -43,7 +43,7 @@ namespace MelonECS
             }
         }
 
-        public int IndexOf(T item)
+        public int IndexOf(in T item)
         {
             for (int i = 0; i < Count; i++)
             {

@@ -31,10 +31,10 @@ namespace MelonECS
         // private readonly List<(Entity, TComponent)> addedComponents = new List<(Entity, TComponent)>();
         // private readonly List<Entity> removedComponents = new List<Entity>();
 
-        private readonly ResizableArray<Entity> addedEntities = new ResizableArray<Entity>(4);
-        private readonly ResizableArray<TComponent> addedComponents = new ResizableArray<TComponent>(4);
-        private readonly ResizableArray<Entity> removedEntities = new ResizableArray<Entity>(4);
-        private readonly ResizableArray<TComponent> removedComponents = new ResizableArray<TComponent>(4);
+        private readonly StructList<Entity> addedEntities = new StructList<Entity>(4);
+        private readonly StructList<TComponent> addedComponents = new StructList<TComponent>(4);
+        private readonly StructList<Entity> removedEntities = new StructList<Entity>(4);
+        private readonly StructList<TComponent> removedComponents = new StructList<TComponent>(4);
 
         private bool isDirty = false;
 

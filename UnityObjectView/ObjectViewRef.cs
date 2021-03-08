@@ -6,5 +6,8 @@
 
         public ObjectViewRef(int id)
             => this.id = id;
+
+        public ObjectViewRef(ObjectView view)
+            => this.id = view.Id;
     }
 }
