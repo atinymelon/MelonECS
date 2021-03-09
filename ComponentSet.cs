@@ -6,8 +6,9 @@ namespace MelonECS
 {
     internal interface IComponentSet
     {
-        void Remove(Entity entity);
-        bool TryRemove(Entity entity);
+        bool Has(in Entity entity);
+        void Remove(in Entity entity);
+        bool TryRemove(in Entity entity);
         void EndOfFrameCleanup();
         void FlushAddsAndRemoves();
         IComponent GetGeneric(in Entity entity);
@@ -71,7 +72,7 @@ namespace MelonECS
             isDirty = true;
         }
 
-        public void Remove(Entity entity)
+        public void Remove(in Entity entity)
         {
             if (!Has(entity))
             {
@@ -83,7 +84,7 @@ namespace MelonECS
             isDirty = true;
         }
 
-        public bool TryRemove(Entity entity)
+        public bool TryRemove(in Entity entity)
         {
             if (!Has(entity))
                 return false;
@@ -91,7 +92,7 @@ namespace MelonECS
             return true;
         }
 
-        public void NotifyChange(Entity entity)
+        public void NotifyChange(in Entity entity)
         {
             ArrayUtil.EnsureLength(ref changed, changedCount + 1);
 

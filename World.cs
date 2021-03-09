@@ -111,6 +111,12 @@ namespace MelonECS
             return ComponentType<T>.Index < componentSets.Length && (((ComponentSet<T>) componentSets[ComponentType<T>.Index])?.Has(entity) ?? false);
         }
 
+        public bool HasComponent(in Entity entity, Type componentType)
+        {
+            int index = ComponentType.Index(componentType);
+            return index < componentSets.Length && (componentSets[index]?.Has(entity) ?? false);
+        }
+
         public ref T GetComponent<T>(in Entity entity) where T : struct, IComponent
         {
             return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).Get(entity);
