@@ -154,6 +154,8 @@ namespace MelonECS
 
         public Span<Entity> GetRemovedEntities<T>() where T : struct, IComponent
         {
+            if (ComponentType<T>.Index > componentSets.Length || componentSets[ComponentType<T>.Index] == null)
+                return Span<Entity>.Empty;
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllRemovedEntities();
         }
 
