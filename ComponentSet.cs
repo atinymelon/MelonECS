@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace MelonECS
 {
-    internal interface IComponentSet
+    public interface IComponentSet
     {
         bool Has(in Entity entity);
         void Remove(in Entity entity);
@@ -16,7 +16,7 @@ namespace MelonECS
         int Count { get; }
     }
     
-    internal class ComponentSet<TComponent> : IComponentSet where TComponent : struct, IComponent
+    public class ComponentSet<TComponent> : IComponentSet where TComponent : struct, IComponent
     {
         private const int INVALID_INDEX = -1;
 

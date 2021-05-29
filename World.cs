@@ -8,15 +8,15 @@ namespace MelonECS
         // To prevent entity ids from being reused too often, we prevent reuse until this many entities have been destroyed
         private const int MINIMUM_ENTITY_FREE_INDICES = 1024;
 
-        internal readonly List<int> entityGenerations = new List<int>();
-        internal readonly Queue<int> entityFreeIndices = new Queue<int>();
+        public readonly List<int> entityGenerations = new List<int>();
+        public readonly Queue<int> entityFreeIndices = new Queue<int>();
 
-        internal IComponentSet[] componentSets = new IComponentSet[16];
-        internal readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
+        public IComponentSet[] componentSets = new IComponentSet[16];
+        public readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
 
-        internal readonly List<Query> queries = new List<Query>();
-        internal readonly List<System> systems = new List<System>();
-        internal IMessageQueue[] messageQueues = new IMessageQueue[16];
+        public readonly List<Query> queries = new List<Query>();
+        public readonly List<System> systems = new List<System>();
+        public IMessageQueue[] messageQueues = new IMessageQueue[16];
         private readonly Dictionary<Type, object> resources = new Dictionary<Type, object>();
         private bool areEntityComponentChanges = false;
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MelonECS
 {
-    internal class EntityComponentMap
+    public class EntityComponentMap
     {
         private HashSet<int>[] components;
 
