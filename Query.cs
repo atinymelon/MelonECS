@@ -78,6 +78,6 @@ namespace MelonECS
         internal bool IsMatch(Query query)
             => includeSet.SetEquals(query.includeSet) && excludeSet.SetEquals(query.excludeSet);
 
-        public Span<Entity> GetEntities() => new Span<Entity>(entities, 0, entitiesSet.Count);
+        public ArrayRef<Entity> GetEntities() => new ArrayRef<Entity>(entities, 0, entitiesSet.Count);
     }
 }

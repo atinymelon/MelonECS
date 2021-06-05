@@ -33,6 +33,6 @@ namespace MelonECS
 
         public HashSet<int> Get(Entity entity) => components[entity.Index];
         
-        public Span<HashSet<int>> Read() => new Span<HashSet<int>>(components);
+        public ArrayRef<HashSet<int>> Read() => new ArrayRef<HashSet<int>>(components, 0, components.Length);
     }
 }

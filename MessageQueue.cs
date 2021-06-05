@@ -35,6 +35,6 @@ namespace MelonECS
             Count = 0;
         }
 
-        public Span<T> Read() => new Span<T>(messages, 0, Count);
+        public ArrayRef<T> Read() => new ArrayRef<T>(messages, 0, Count);
     }
 }

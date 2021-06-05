@@ -57,7 +57,7 @@ namespace MelonECS
 
         protected bool IsEntityAlive(in Entity entity) => world.IsEntityAlive(entity);
 
-        protected Span<T> GetComponents<T>() where T : struct, IComponent
+        protected ArrayRef<T> GetComponents<T>() where T : struct, IComponent
             => world.GetComponents<T>();
 
         protected ref T GetComponent<T>(in Entity entity) where T : struct, IComponent
@@ -69,7 +69,7 @@ namespace MelonECS
         protected void PushMessage<T>(T message) where T : struct, IMessage
             => world.PushMessage(message);
 
-        protected Span<T> ReadMessages<T>() where T : struct, IMessage
+        protected ArrayRef<T> ReadMessages<T>() where T : struct, IMessage
             => world.ReadMessages<T>();
 
         protected bool AnyMessages<T>() where T : struct, IMessage
@@ -78,13 +78,13 @@ namespace MelonECS
         protected Entity GetEntityWithComponent<T>() where T : struct, IComponent
             => world.GetEntitiesWithComponent<T>()[0];
 
-        protected Span<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
+        protected ArrayRef<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
             => world.GetEntitiesWithComponent<T>();
 
-        protected Span<Entity> QueryEntities()
+        protected ArrayRef<Entity> QueryEntities()
             => query.GetEntities();
         
-        protected Span<Entity> GetChanged<T>() where T : struct, IComponent
+        protected ArrayRef<Entity> GetChanged<T>() where T : struct, IComponent
             => world.GetChanged<T>();
 
         protected void NotifyChange<T>(in Entity entity) where T : struct, IComponent

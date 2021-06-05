@@ -116,7 +116,7 @@ namespace MelonECS
                 return;
             
             // Process adds and removes
-            foreach (ref Entity entity in removedEntities.Span)
+            foreach (ref Entity entity in removedEntities.ArrayRef)
             {
                 if (indices[entity.Index] == INVALID_INDEX)
                     continue;
@@ -132,29 +132,29 @@ namespace MelonECS
             
             ArrayUtil.EnsureLength(ref entities, Count + addedEntities.Count + 1);
             ArrayUtil.EnsureLength(ref components, Count + addedComponents.Count + 1);
-            for (int i = 0; i < addedEntities.Span.Length; i++)
+            for (int i = 0; i < addedEntities.ArrayRef.Length; i++)
             {
-                Entity entity = addedEntities.Span[i];
+                Entity entity = addedEntities.ArrayRef[i];
 
                 if (indices[entity.Index] != INVALID_INDEX)
                     continue;
                 
                 indices[entity.Index] = Count;
                 entities[Count] = entity;
-                components[Count] = addedComponents.Span[i];
+                components[Count] = addedComponents.ArrayRef[i];
                 Count++;
             }
         }
 
-        public Span<Entity> AllEntities() => new Span<Entity>(entities, 0, Count);
-        public Span<TComponent> AllComponents() => new Span<TComponent>(components, 0, Count);
-        public Span<Entity> AllChanged() => new Span<Entity>(changed, 0, changedCount);
+        public ArrayRef<Entity> AllEntities() => new ArrayRef<Entity>(entities, 0, Count);
+        public ArrayRef<TComponent> AllComponents() => new ArrayRef<TComponent>(components, 0, Count);
+        public ArrayRef<Entity> AllChanged() => new ArrayRef<Entity>(changed, 0, changedCount);
         
-        public Span<Entity> AllAddedEntities() => addedEntities.Span;
-        public ref TComponent GetAddedComponent(in Entity entity) => ref addedComponents.Span[addedEntities.IndexOf(entity)];
+        public ArrayRef<Entity> AllAddedEntities() => addedEntities.ArrayRef;
+        public ref TComponent GetAddedComponent(in Entity entity) => ref addedComponents.ArrayRef[addedEntities.IndexOf(entity)];
 
-        public Span<Entity> AllRemovedEntities() => removedEntities.Span;
-        public ref TComponent GetRemovedComponent(in Entity entity) => ref removedComponents.Span[removedEntities.IndexOf(entity)];
+        public ArrayRef<Entity> AllRemovedEntities() => removedEntities.ArrayRef;
+        public ref TComponent GetRemovedComponent(in Entity entity) => ref removedComponents.ArrayRef[removedEntities.IndexOf(entity)];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Has(in Entity entity) => indices[entity.Index] != INVALID_INDEX;
@@ -162,6 +162,6 @@ namespace MelonECS
         // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TComponent Get(in Entity entity) => ref components[indices[entity.Index]];
 
-        public IComponent GetGeneric(in Entity entity) => (IComponent)components[indices[entity.Index]];
+        public IComponent GetGeneric(in Entity entity) => components[indices[entity.Index]];
     }
 }

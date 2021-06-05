@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MelonECS
 {
     public class StructList< T > where T : struct
     {
         public int Count { get; private set; }
-        public Span<T> Span => new Span<T>(array, 0, Count);
+        public ArrayRef<T> ArrayRef => new ArrayRef<T>(array, 0, Count);
         
         private T[] array;
 
@@ -29,7 +30,7 @@ namespace MelonECS
         {
             for (int i = 0; i < Count; i++)
             {
-                if (Equals(array[Count], item))
+                if (EqualityComparer<T>.Default.Equals(array[Count], item))
                 {
                     for (int j = i; j < Count - 1; j++)
                     {
@@ -46,7 +47,7 @@ namespace MelonECS
         {
             for (int i = 0; i < Count; i++)
             {
-                if (Equals(array[i], item))
+                if (EqualityComparer<T>.Default.Equals(array[i], item))
                     return i;
             }
             return -1;

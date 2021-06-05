@@ -122,12 +122,12 @@ namespace MelonECS
             return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).Get(entity);
         }
 
-        public Span<T> GetComponents<T>() where T : struct, IComponent
+        public ArrayRef<T> GetComponents<T>() where T : struct, IComponent
         {
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllComponents();
         }
         
-        public Span<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
+        public ArrayRef<Entity> GetEntitiesWithComponent<T>() where T : struct, IComponent
         {
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllEntities();
         }
@@ -137,12 +137,12 @@ namespace MelonECS
             ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).NotifyChange(entity);
         }
 
-        public Span<Entity> GetChanged<T>() where T : struct, IComponent
+        public ArrayRef<Entity> GetChanged<T>() where T : struct, IComponent
         {
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllChanged();
         }
 
-        public Span<Entity> GetAddedEntities<T>() where T : struct, IComponent
+        public ArrayRef<Entity> GetAddedEntities<T>() where T : struct, IComponent
         {
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllAddedEntities();
         }
@@ -152,10 +152,10 @@ namespace MelonECS
             return ref ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).GetAddedComponent(entity);
         }
 
-        public Span<Entity> GetRemovedEntities<T>() where T : struct, IComponent
+        public ArrayRef<Entity> GetRemovedEntities<T>() where T : struct, IComponent
         {
             if (ComponentType<T>.Index > componentSets.Length || componentSets[ComponentType<T>.Index] == null)
-                return Span<Entity>.Empty;
+                return ArrayRef<Entity>.Empty;
             return ((ComponentSet<T>) componentSets[ComponentType<T>.Index]).AllRemovedEntities();
         }
 
@@ -260,7 +260,7 @@ namespace MelonECS
             ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Push(evt);
         }
 
-        public Span<T> ReadMessages<T>() where T : struct, IMessage
+        public ArrayRef<T> ReadMessages<T>() where T : struct, IMessage
         {
             if (messageQueues[MessageType<T>.Index] == null)
             {
