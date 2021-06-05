@@ -37,15 +37,15 @@ namespace MelonECS.UnityObserver.Editor
 
         private void DrawStats()
         {
-            EditorGUILayout.LabelField("Entities", (world.entityGenerations.Count - world.entityFreeIndices.Count).ToString());
-            EditorGUILayout.LabelField("Events", world.eventQueues.Where(x => x != null).Sum(x => x.Count).ToString());
-            EditorGUILayout.LabelField("Systems", world.systems.Count.ToString());
-            EditorGUILayout.LabelField("Queries", world.queries.Count.ToString());
+            EditorGUILayout.LabelField("Entities", (world.GetEntityGenerations().Count() - world.GetEntityFreeIndices().Count()).ToString());
+            EditorGUILayout.LabelField("Events", world.GetEventQueues().Where(x => x != null).Sum(x => x.Count).ToString());
+            EditorGUILayout.LabelField("Systems", world.GetSystems().Count().ToString());
+            EditorGUILayout.LabelField("Queries", world.GetQueries().Count().ToString());
         }
         
         private void DrawSystems()
         {
-            foreach (var system in world.systems)
+            foreach (var system in world.GetSystems())
             {
                 EditorGUILayout.LabelField(system.GetType().Name);
             }
@@ -53,9 +53,9 @@ namespace MelonECS.UnityObserver.Editor
 
         private void DrawComponents()
         {
-            for (int index = 0; index < world.componentSets.Length; index++)
+            for (int index = 0; index < world.GetComponentSets().Count(); index++)
             {
-                IComponentSet componentSet = world.componentSets[index];
+                IComponentSet componentSet = world.GetComponentSets().ElementAt(index);
                 if (componentSet == null)
                     continue;
 
@@ -117,12 +117,12 @@ namespace MelonECS.UnityObserver.Editor
             bool isSearching = !string.IsNullOrEmpty(entitySearch) && !string.IsNullOrWhiteSpace(entitySearch);
             EditorGUILayout.EndHorizontal();
 
-            for (int i = 0; i < world.entityGenerations.Count; i++)
+            for (int i = 0; i < world.GetEntityGenerations().Count(); i++)
             {
-                int generation = world.entityGenerations[i];
+                int generation = world.GetEntityGenerations().ElementAt(i);
                 Entity entity = new Entity(world, i, generation);
                 
-                var componentTypes = world.entityComponentMap.Get(entity)?.Select(ComponentType.Type).ToArray();
+                var componentTypes = world.GetEntityComponentMap().Get(entity)?.Select(ComponentType.Type).ToArray();
                 if (componentTypes != null && !componentTypes.Any(x => x.Name.IndexOf(entitySearch, StringComparison.InvariantCultureIgnoreCase) != -1))
                     continue;
                 
@@ -150,7 +150,7 @@ namespace MelonECS.UnityObserver.Editor
                 {
                     var componentFields =
                         componentType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                    var component = world.componentSets[ComponentType.Index(componentType)].GetGeneric(in entity);
+                    var component = world.GetComponentSets().ElementAt(ComponentType.Index(componentType)).GetGeneric(in entity);
                     
                     EditorGUILayout.LabelField(componentType.Name);
                     
@@ -179,7 +179,7 @@ namespace MelonECS.UnityObserver.Editor
 
         private void DrawMessages()
         {
-            foreach (var queue in world.eventQueues)
+            foreach (var queue in world.GetEventQueues())
             {
                 if (queue == null)
                     continue;

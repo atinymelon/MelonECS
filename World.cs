@@ -3,25 +3,40 @@ using System.Collections.Generic;
 
 namespace MelonECS
 {
+    public class World<T> : World where T : IContext
+    {
+        public T Context { get; }
+
+        public World(T context)
+        {
+            Context = context;
+        }
+    }
+    
     public class World
     {
         // To prevent entity ids from being reused too often, we prevent reuse until this many entities have been destroyed
         private const int MINIMUM_ENTITY_FREE_INDICES = 1024;
 
-        public readonly List<int> entityGenerations = new List<int>();
-        public readonly Queue<int> entityFreeIndices = new Queue<int>();
-
-        public IComponentSet[] componentSets = new IComponentSet[16];
-        public readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
-
-        public readonly List<Query> queries = new List<Query>();
-        public readonly List<System> systems = new List<System>();
-        public IEventQueue[] eventQueues = new IEventQueue[16];
-        private readonly Dictionary<Type, object> resources = new Dictionary<Type, object>();
+        private readonly List<int> entityGenerations = new List<int>();
+        private readonly Queue<int> entityFreeIndices = new Queue<int>();
+        private IComponentSet[] componentSets = new IComponentSet[16];
+        private readonly EntityComponentMap entityComponentMap = new EntityComponentMap(MINIMUM_ENTITY_FREE_INDICES);
+        private readonly List<Query> queries = new List<Query>();
+        private readonly List<System> systems = new List<System>();
+        private IEventQueue[] eventQueues = new IEventQueue[16];
         private bool areEntityComponentChanges = false;
+        
+        public IEnumerable<int> GetEntityGenerations() => entityGenerations;
+        public IEnumerable<int> GetEntityFreeIndices() => entityFreeIndices;
+        public IEnumerable<IComponentSet> GetComponentSets() => componentSets;
+        public EntityComponentMap GetEntityComponentMap() => entityComponentMap;
+        public IEnumerable<Query> GetQueries() => queries;
+        public IEnumerable<System> GetSystems() => systems;
+        public IEnumerable<IEventQueue> GetEventQueues() => eventQueues;
 
         #region Entities
-
+        
         public Entity CreateEntity()
         {
             int index;
@@ -177,14 +192,6 @@ namespace MelonECS
 
         #endregion
 
-        #region Resources
-
-        public void AddResource<T>(T resource) where T : class => resources.Add(typeof(T), resource);
-        public T GetResource<T>() where T : class => (T)resources[typeof(T)];
-        public bool TryGetResource(Type type, out object resource) => resources.TryGetValue(type, out resource);
-
-        #endregion
-        
         #region Queries
         
         public Query CreateQuery(IEnumerable<Type> include, IEnumerable<Type> exclude)

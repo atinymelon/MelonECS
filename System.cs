@@ -6,6 +6,18 @@ using UnityEngine;
 
 namespace MelonECS
 {
+    public abstract class System<T> : System where T : IContext
+    {
+        protected T Context { get; private set; }
+        
+        public override void Init(World world)
+        {
+            base.Init(world);
+
+            Context = ((World<T>) world).Context;
+        }
+    }
+    
     public abstract class System
     {
         protected World world;
@@ -34,23 +46,6 @@ namespace MelonECS
   
             if ( queryIncludeTypes != null || queryExcludeTypes != null )
                 query = world.CreateQuery(queryIncludeTypes, queryExcludeTypes);
-            
-            // Setup resources
-            var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (FieldInfo field in fields)
-            {
-                if (field.IsStatic || !field.IsDefined(typeof(ResourceAttribute)))
-                    continue;
-
-                if (world.TryGetResource(field.FieldType, out object resource))
-                {
-                    field.SetValue(this, resource);
-                }
-                else
-                {
-                    Debug.LogError($"No resource of type {field.FieldType.FullName} exists");
-                }
-            }
         }
         
         public abstract void Run();
