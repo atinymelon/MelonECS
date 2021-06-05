@@ -16,7 +16,7 @@ namespace MelonECS
 
         public readonly List<Query> queries = new List<Query>();
         public readonly List<System> systems = new List<System>();
-        public IMessageQueue[] messageQueues = new IMessageQueue[16];
+        public IEventQueue[] eventQueues = new IEventQueue[16];
         private readonly Dictionary<Type, object> resources = new Dictionary<Type, object>();
         private bool areEntityComponentChanges = false;
 
@@ -217,9 +217,9 @@ namespace MelonECS
                 Flush();
             }
         
-            for (int i = 0; i < messageQueues.Length; i++)
+            for (int i = 0; i < eventQueues.Length; i++)
             {
-                messageQueues[i]?.Clear();
+                eventQueues[i]?.Clear();
             }
 
             for (int i = 0; i < componentSets.Length; i++)
@@ -248,26 +248,26 @@ namespace MelonECS
         
         #endregion
 
-        #region Messages
+        #region Events
 
-        public void PushMessage<T>(T evt) where T : struct, IMessage
+        public void PushEvent<T>(T evt) where T : struct, IEvent
         {
-            if (messageQueues[MessageType<T>.Index] == null)
+            if (eventQueues[EventType<T>.Index] == null)
             {
-                ArrayUtil.EnsureLength(ref messageQueues, MessageType<T>.Index + 1);
-                messageQueues[MessageType<T>.Index] = new MessageQueue<T>();
+                ArrayUtil.EnsureLength(ref eventQueues, EventType<T>.Index + 1);
+                eventQueues[EventType<T>.Index] = new EventQueue<T>();
             }
-            ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Push(evt);
+            ((EventQueue<T>) eventQueues[EventType<T>.Index]).Push(evt);
         }
 
-        public ArrayRef<T> ReadMessages<T>() where T : struct, IMessage
+        public ArrayRef<T> ReadEvents<T>() where T : struct, IEvent
         {
-            if (messageQueues[MessageType<T>.Index] == null)
+            if (eventQueues[EventType<T>.Index] == null)
             {
-                ArrayUtil.EnsureLength(ref messageQueues, MessageType<T>.Index + 1);
-                messageQueues[MessageType<T>.Index] = new MessageQueue<T>();
+                ArrayUtil.EnsureLength(ref eventQueues, EventType<T>.Index + 1);
+                eventQueues[EventType<T>.Index] = new EventQueue<T>();
             }
-            return ((MessageQueue<T>) messageQueues[MessageType<T>.Index]).Read();
+            return ((EventQueue<T>) eventQueues[EventType<T>.Index]).Read();
         }
 
         #endregion

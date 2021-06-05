@@ -1,6 +1,6 @@
 ﻿namespace MelonECS
 {
-    public interface IMessage
+    public interface IEvent
     {
         
     }

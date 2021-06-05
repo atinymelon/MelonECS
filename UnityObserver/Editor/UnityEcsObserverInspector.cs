@@ -38,7 +38,7 @@ namespace MelonECS.UnityObserver.Editor
         private void DrawStats()
         {
             EditorGUILayout.LabelField("Entities", (world.entityGenerations.Count - world.entityFreeIndices.Count).ToString());
-            EditorGUILayout.LabelField("Messages", world.messageQueues.Where(x => x != null).Sum(x => x.Count).ToString());
+            EditorGUILayout.LabelField("Events", world.eventQueues.Where(x => x != null).Sum(x => x.Count).ToString());
             EditorGUILayout.LabelField("Systems", world.systems.Count.ToString());
             EditorGUILayout.LabelField("Queries", world.queries.Count.ToString());
         }
@@ -179,7 +179,7 @@ namespace MelonECS.UnityObserver.Editor
 
         private void DrawMessages()
         {
-            foreach (var queue in world.messageQueues)
+            foreach (var queue in world.eventQueues)
             {
                 if (queue == null)
                     continue;

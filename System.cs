@@ -66,14 +66,14 @@ namespace MelonECS
         protected bool HasComponent<T>(in Entity entity) where T : struct, IComponent
             => world.HasComponent<T>(entity);
 
-        protected void PushMessage<T>(T message) where T : struct, IMessage
-            => world.PushMessage(message);
+        protected void PushEvent<T>(T evt) where T : struct, IEvent
+            => world.PushEvent(evt);
 
-        protected ArrayRef<T> ReadMessages<T>() where T : struct, IMessage
-            => world.ReadMessages<T>();
+        protected ArrayRef<T> ReadEvents<T>() where T : struct, IEvent
+            => world.ReadEvents<T>();
 
-        protected bool AnyMessages<T>() where T : struct, IMessage
-            => world.ReadMessages<T>().Length > 0;
+        protected bool AnyEvents<T>() where T : struct, IEvent
+            => world.ReadEvents<T>().Length > 0;
 
         protected Entity GetEntityWithComponent<T>() where T : struct, IComponent
             => world.GetEntitiesWithComponent<T>()[0];
