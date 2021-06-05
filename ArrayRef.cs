@@ -19,24 +19,26 @@ namespace MelonECS
             startIndex = start;
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(target, startIndex);
+        public Enumerator GetEnumerator() => new Enumerator(target, startIndex, Length);
         
         public struct Enumerator
         {
             private readonly T[] target;
             private int index;
+            private int count;
 
-            public Enumerator(T[] target, int index)
+            public Enumerator(T[] target, int index, int count)
             {
                 this.target = target;
                 this.index = index;
+                this.count = count;
             }
 
             public readonly ref T Current
             {
                 get
                 {
-                    if (target is null || index < 0 || index > target.Length)
+                    if (target is null || index < 0 || index > count)
                     {
                         throw new InvalidOperationException();
                     }
@@ -44,7 +46,7 @@ namespace MelonECS
                 }
             }
 
-            public bool MoveNext() => ++index < target.Length;
+            public bool MoveNext() => ++index < count;
             public void Reset() => index = -1;
         }
     }
