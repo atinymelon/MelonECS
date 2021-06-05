@@ -210,6 +210,12 @@ namespace MelonECS
 
         public void Init()
         {
+            var resolver = new SystemDependencyResolver();
+
+            var newSystems = resolver.ResolveDependencies(systems);
+            systems.Clear();
+            systems.AddRange(newSystems);
+
             foreach (System system in systems)
             {
                 system.Init(this);
